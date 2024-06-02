@@ -1,0 +1,89 @@
+// Techatronic.com
+#include <SPI.h>
+#include <MFRC522.h>
+// #include <Wire.h>
+// Set the LCD address to 0x27 for a 16 chars and 2 line display
+
+#define SS_PIN 10
+#define RST_PIN 9
+MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance.
+int s1 = 0, s2 = 0, s3 = 0;
+
+void setup()
+{
+  Serial.begin(9600); // Initiate a serial communication
+  SPI.begin();        // Initiate SPI bus
+  mfrc522.PCD_Init(); // Initiate MFRC522
+  Serial.print("System Initialized !\n");
+}
+void loop()
+{
+  // Look for new cards
+  if (!mfrc522.PICC_IsNewCardPresent())
+  {
+    delay(1000);
+    return;
+  }
+  // Select one of the cards
+  if (!mfrc522.PICC_ReadCardSerial())
+  {
+    return;
+  }
+  //Show UID on serial monitor
+  String content = "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++)
+  {
+    content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+    content.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  Serial.println();
+  content.toUpperCase();
+  if (content.substring(1) == "C5 FF DD CE") //change here the UID of the card/cards that you want to give access
+  {
+    if (s1 == 0)
+    {
+      Serial.print("Student 1 ENTERED.\n");
+      s1 = 1;
+    }
+    else
+    {
+      Serial.print("Student 1 EXITED.\n");
+      s1 = 0;
+    }
+    delay(300);
+  }
+  else if (content.substring(1) == "A1 7B C8 91") //change here the UID of the card/cards that you want to give access
+  {
+    if (s2 == 0)
+    {
+      Serial.print("Student 2 ENTERED.\n");
+      s2 = 1;
+    }
+    else
+    {
+      Serial.print("Student 2 EXITED.\n");
+      s2 = 0;
+    }
+    delay(300);
+  }
+  else if (content.substring(1) == "25 8E 19 CF") //change here the UID of the card/cards that you want to give access
+  {
+    if (s3 == 0)
+    {
+      Serial.print("Student 3 ENTERED.\n");
+      s3 = 1;
+    }
+    else
+    {
+      Serial.print("Student 3 EXITED.\n");
+      s3 = 0;
+    }
+    delay(300);
+  }
+  else
+  {
+    Serial.print("UNAUTHORIZED\n");
+    delay(2000);
+  }
+}
